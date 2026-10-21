@@ -36,7 +36,7 @@ int main(int argc,char *argv[])
 
     if(fd < 0)
     {
-        printf("Datoteka neobstaja, prosimo ustvarite datoteko pred pisanjem \n");
+        perror("Open error");
         exit(1);
     }
 
@@ -50,11 +50,7 @@ int main(int argc,char *argv[])
         printf("%s",buf);
         
     }
-    
-    
-
     close(fd);
-
     return 0;
 
 }

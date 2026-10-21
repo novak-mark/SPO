@@ -4,17 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_BUFFER_SIZE 1024
 
 int main(int argc,char *argv[])
 {
     int fd;
     int file_size;
     int number_of_bytes;
-    int bytes_written;
     char *path_to_file;
-    char buf[MAX_BUFFER_SIZE];
-    char test;
+    char znak;
     int filesize;
     int i;
     int count = 0;
@@ -49,34 +46,34 @@ int main(int argc,char *argv[])
      {
         lseek(fd, i, SEEK_SET);
 
-        number_of_bytes = read(fd, &test,1);
+        number_of_bytes = read(fd, &znak,1);
         if(number_of_bytes != 1)
         {
-            printf("Read ERROR");
+            perror("READ ERROR");
             exit(2);
         }
-        if(test == '\n')
+        if(znak == '\n')
         {
-
             count++;
             if(count >= lines_to_read)
-            {
-                
+            {       
                 i++;
                 break;
             }
         }
     }
 
-    lseek(fd,i,SEEK_SET);
-
-    while(number_of_bytes = read(fd,&test,1) > 0)
+    if(lseek(fd,i,SEEK_SET == -1))
     {
-        printf("%c",test);
+        perror("LSEEK ERROR");
+        exit(3);
     }
 
+    while(number_of_bytes = read(fd,&znak,1) > 0)
+    {
+        printf("%c",znak);
+    }
 
-    
     close(fd);
     return 0;
 }
