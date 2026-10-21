@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_BUFFER_SIZE 128
+#define MAX_BUFFER_SIZE 256
 
 int main(int argc,char *argv[])
 {
@@ -31,7 +31,7 @@ int main(int argc,char *argv[])
     else
     {
         path_to_file = argv[1];
-        fd = open(path_to_file,O_RDWR);
+        fd = open(path_to_file,O_WRONLY | O_TRUNC | O_CREAT, 0700);
     }
 
     if(fd < 0)
@@ -41,15 +41,22 @@ int main(int argc,char *argv[])
     }
 
 
+
     while( (number_of_bytes = read(STDIN_FILENO, buf, MAX_BUFFER_SIZE)) > 0)
     {
-		if ( write(fd, buf, number_of_bytes) != number_of_bytes)
+		if ( (write(fd, buf, number_of_bytes)) != number_of_bytes)
         {
-			printf("Napaka.\n");
+			perror("Write error");
+            exit(2);
         }
-        printf("%s",buf);
+        if( (write(STDOUT_FILENO,buf,number_of_bytes)) != number_of_bytes)
+        {
+            perror("Write error");
+            exit(2);
+        }
         
     }
+    
     close(fd);
     return 0;
 

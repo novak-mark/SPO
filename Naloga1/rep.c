@@ -8,7 +8,6 @@
 int main(int argc,char *argv[])
 {
     int fd;
-    int file_size;
     int number_of_bytes;
     char *path_to_file;
     char znak;
@@ -20,6 +19,11 @@ int main(int argc,char *argv[])
     
     if(argc > 3)
     {
+        if(strcmp(argv[1],"-n") != 0)
+        {
+            printf("Nezanani argument, pravilna uporaba: -n [STEVILO] ime_datoteke \n");
+            exit(4);
+        }
         lines_to_read = atoi(argv[2]);
         path_to_file = argv[3]; 
     }
@@ -35,17 +39,23 @@ int main(int argc,char *argv[])
         printf("Datoteka neobstaja, prosimo ustvarite datoteko pred pisanjem \n");
         exit(1);
     }
-
     
-    
-     filesize = lseek(fd,-3,SEEK_END);
+    filesize = lseek(fd,-3,SEEK_END);
 
-     
+    if(filesize == -1)
+    {
+        perror("LSEEK ERROR");
+        exit(3);
+    }
 
      for (i = filesize; i > 0; i--) 
      {
-        lseek(fd, i, SEEK_SET);
-
+        if((lseek(fd, i, SEEK_SET)) == -1)
+        {
+            perror("LSEEK ERROR");
+            exit(3);
+        }
+    
         number_of_bytes = read(fd, &znak,1);
         if(number_of_bytes != 1)
         {
@@ -63,7 +73,7 @@ int main(int argc,char *argv[])
         }
     }
 
-    if(lseek(fd,i,SEEK_SET == -1))
+    if((lseek(fd,i,SEEK_SET)) == -1)
     {
         perror("LSEEK ERROR");
         exit(3);
