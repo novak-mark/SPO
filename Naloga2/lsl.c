@@ -13,9 +13,10 @@ int main(int argc,char *argv[])
     int status;
     char *path_to_file;
     char file_type;
-    char user_prems[4];
-    char group_prems[4];
-    char other_prems[4];
+    char file_prems[10];
+    char stickybit;
+    char setuserid;
+    
 
     
     path_to_file = argv[1];
@@ -30,7 +31,7 @@ int main(int argc,char *argv[])
     
     if(S_ISREG(buff.st_mode))
     {
-        file_type = '.';
+        file_type = '-';
     }
     else if(S_ISDIR(buff.st_mode))
     {
@@ -62,24 +63,26 @@ int main(int argc,char *argv[])
     }
 
     //user dovoljenja
-    user_prems[0] = (buff.st_mode & S_IRUSR) ? 'r' : '-';
-    user_prems[1] = (buff.st_mode & S_IWUSR) ? 'w' : '-';
-    user_prems[2] = (buff.st_mode & S_IXUSR) ? 'x' : '-';
-    user_prems[3] = '\0';
+    file_prems[0] = (buff.st_mode & S_IRUSR) ? 'r' : '-';
+    file_prems[1] = (buff.st_mode & S_IWUSR) ? 'w' : '-';
+    file_prems[2] = (buff.st_mode & S_IXUSR) ? 'x' : '-';
    //group dovoljenja
-    group_prems[0] = (buff.st_mode & S_IRGRP) ? 'r' : '-';
-    group_prems[1] = (buff.st_mode & S_IWGRP) ? 'w' : '-';
-    group_prems[2] = (buff.st_mode & S_IXGRP) ? 'x' : '-';
-    group_prems[3] = '\0';
+    file_prems[3] = (buff.st_mode & S_IRGRP) ? 'r' : '-';
+    file_prems[4] = (buff.st_mode & S_IWGRP) ? 'w' : '-';
+    file_prems[5] = (buff.st_mode & S_IXGRP) ? 'x' : '-';
   //other dovoljenja
-    other_prems[0] = (buff.st_mode & S_IROTH) ? 'r' : '-';
-    other_prems[1] = (buff.st_mode & S_IWOTH) ? 'w' : '-';
-    other_prems[2] = (buff.st_mode & S_IXOTH) ? 'x' : '-';
-    other_prems[3] = '\0';
+    file_prems[6] = (buff.st_mode & S_IROTH) ? 'r' : '-';
+    file_prems[7] = (buff.st_mode & S_IWOTH) ? 'w' : '-';
+    file_prems[8] = (buff.st_mode & S_IXOTH) ? 'x' : '-';
+    file_prems[9] = '\0';
+
+    setuserid = (buff.st_mode & S_ISUID & S_IXUSR) ? 's' : 'S';
+
+    stickybit = (buff.st_mode & S_ISVTX) ? 't' : 'T';
     
     file_owner = getpwuid(buff.st_uid);
     
-    printf("%c%s%s%s %d %s %d %s\n",file_type,user_prems,group_prems,other_prems,buff.st_nlink,file_owner->pw_name,buff.st_size,argv[1]);
+    printf("%c%s%c %d %s %d %s\n",file_type,file_prems,stickybit,buff.st_nlink,file_owner->pw_name,buff.st_size,argv[1]);
 
     
 
