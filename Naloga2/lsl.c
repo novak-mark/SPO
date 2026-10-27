@@ -65,12 +65,26 @@ int main(int argc,char *argv[])
     //user dovoljenja
     file_prems[0] = (buff.st_mode & S_IRUSR) ? 'r' : '-';
     file_prems[1] = (buff.st_mode & S_IWUSR) ? 'w' : '-';
-    file_prems[2] = (buff.st_mode & S_IXUSR) ? 'x' : '-';
-   //group dovoljenja
+    if((buff.st_mode & S_IXUSR))
+    {
+        file_prems[2] = (buff.st_mode & S_ISUID) ? 's' : 'x';
+    }
+    else
+    {
+        file_prems[2] = (buff.st_mode & S_ISUID) ? 'S' : '-';
+    }
+    //group dovoljenja
     file_prems[3] = (buff.st_mode & S_IRGRP) ? 'r' : '-';
     file_prems[4] = (buff.st_mode & S_IWGRP) ? 'w' : '-';
-    file_prems[5] = (buff.st_mode & S_IXGRP) ? 'x' : '-';
-  //other dovoljenja
+    if((buff.st_mode & S_IXGRP))
+    {
+        file_prems[5] = (buff.st_mode & S_ISGID) ? 's' : 'x';
+    }
+    else
+    {
+        file_prems[5] = (buff.st_mode & S_ISGID) ? 'S' : '-';
+    }
+    //other dovoljenja
     file_prems[6] = (buff.st_mode & S_IROTH) ? 'r' : '-';
     file_prems[7] = (buff.st_mode & S_IWOTH) ? 'w' : '-';
     file_prems[8] = (buff.st_mode & S_IXOTH) ? 'x' : '-';
@@ -78,7 +92,7 @@ int main(int argc,char *argv[])
 
     setuserid = (buff.st_mode & S_ISUID & S_IXUSR) ? 's' : 'S';
 
-    stickybit = (buff.st_mode & S_ISVTX) ? 't' : 'T';
+    
     
     file_owner = getpwuid(buff.st_uid);
     
