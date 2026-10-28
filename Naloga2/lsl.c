@@ -17,8 +17,11 @@ int main(int argc,char *argv[])
     char stickybit;
     char setuserid;
     
-
-    
+    if(argc < 1)
+    {
+        printf("Premalo argumentov");
+        exit(1);
+    }
     path_to_file = argv[1];
 
     status = stat(path_to_file,&buff);
@@ -87,13 +90,21 @@ int main(int argc,char *argv[])
     //other dovoljenja
     file_prems[6] = (buff.st_mode & S_IROTH) ? 'r' : '-';
     file_prems[7] = (buff.st_mode & S_IWOTH) ? 'w' : '-';
-    file_prems[8] = (buff.st_mode & S_IXOTH) ? 'x' : '-';
+    if(buff.st_mode & S_ISVTX)
+    {
+        
+        file_prems[8] = (buff.st_mode & S_IXOTH) ? 't' : 'T';
+    }
+    else 
+    {
+        
+        file_prems[8] = (buff.st_mode & S_IXOTH) ? 'x' : '-';
+
+    }
     file_prems[9] = '\0';
 
     setuserid = (buff.st_mode & S_ISUID & S_IXUSR) ? 's' : 'S';
 
-    
-    
     file_owner = getpwuid(buff.st_uid);
     
     printf("%c%s%c %d %s %d %s\n",file_type,file_prems,stickybit,buff.st_nlink,file_owner->pw_name,buff.st_size,argv[1]);

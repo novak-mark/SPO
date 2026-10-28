@@ -34,6 +34,12 @@ int main(int argc,char *argv[])
     char *pt_prem;
     long int input_prem;
 
+
+    if(argc < 3)
+    {
+        printf("Premalo argumentov: ./mojchmod <dovoljenja> <ime_datoteke> \n");
+        exit(1);
+    }
     
 
     
@@ -62,12 +68,13 @@ int main(int argc,char *argv[])
     }
     else if(strcmp(argv[1],"a+rX") == 0)
     {
-        new_mode = buff.st_mode | S_IRUSR | S_IRGRP | S_IROTH;
+        if(buff.st_mode & S_IRUSR || buff.st_mode & S_IRGRP || buff.st_mode & S_IROTH)
+        {
+             new_mode = buff.st_mode | S_IRUSR | S_IRGRP | S_IROTH;
 
-        chmodstatus = chmod(path_to_file,new_mode);
-
+            chmodstatus = chmod(path_to_file,new_mode);
+        }
     }
-
     else 
     {
         check_input(argv[1]);
