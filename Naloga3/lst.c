@@ -66,7 +66,6 @@ int main(int argc,char *argv[])
     int file_count = 0;
     int status;
     struct stat buff;
-    struct passwd *file_owner;
     char file_path[256];
     char *path_to_dir;
     DIR *target_dir;
@@ -153,7 +152,6 @@ int main(int argc,char *argv[])
             perror("Stat error");
             exit(3);
         }
-        
         ptr[i].file_name = strdup(dirp->d_name);
         if(S_ISDIR(buff.st_mode))
         {
