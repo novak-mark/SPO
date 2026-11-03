@@ -7,7 +7,6 @@
 
 int main(int argc,char *argv[])
 {
-    int fd;
     struct stat buff;
     struct passwd *file_owner;
     int status;

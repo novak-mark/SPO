@@ -8,11 +8,17 @@
 #include <string.h>
 
 #define MAX_BUFFER_SIZE 128
+#define BLUE "\033[34m"
+#define RESET "\033[0m"
 
+
+
+int is_reverse = 0;
 
 struct file 
 {
     char *file_name;
+    int is_dir;
     time_t mtime;
 };
 
@@ -21,18 +27,37 @@ int comp(const void *a, const void *b)
     struct file *file_a =  (struct file*)a;
     struct file *file_b =  (struct file*)b;
 
-    if(file_a->mtime < file_b->mtime)
+    if(is_reverse)
     {
-        return 1;
-    }
-    else if(file_a->mtime > file_b->mtime)
-    {
-        return -1;
+        if (file_a->mtime > file_b->mtime)
+        {
+            return 1;
+        }
+        else if (file_a->mtime < file_b->mtime)
+        {
+            return -1;
+        }
+        else
+        {
+            return strcmp(file_a->file_name, file_b->file_name);
+        }
     }
     else 
     {
-        return 0;
+        if (file_a->mtime > file_b->mtime)
+        {
+            return -1;
+        }
+        else if (file_a->mtime < file_b->mtime)
+        {
+            return 1;
+        }
+        else
+        {
+            return strcmp(file_a->file_name, file_b->file_name);
+        }
     }
+   
 }
 
 int main(int argc,char *argv[])
@@ -47,13 +72,30 @@ int main(int argc,char *argv[])
     DIR *target_dir;
     struct dirent *dirp;
 
+ 
     if(argc < 1)
     {
         printf("Premalo argumentov");
         exit(1);
     }
-    path_to_dir = argv[1];
-
+    if(argc > 2)
+    {
+        if((strcmp(argv[1],"-r")) == 0)
+        {
+            is_reverse = 1;
+            path_to_dir = argv[2];
+        }
+        else 
+        {
+            printf("Napcani argument \n");
+            exit(2);
+        }
+       
+    }
+    else
+    {
+        path_to_dir = argv[1];
+    }
     target_dir = opendir(path_to_dir);
 
 
@@ -71,12 +113,21 @@ int main(int argc,char *argv[])
             perror("Read error");
             exit(2);
         }
+        if((strcmp(dirp->d_name,".") == 0 || strcmp(dirp->d_name,"..") == 0))
+        {
+            continue;
+        }
+        if (dirp->d_name[0] == '.')
+        {
+            continue;
+        }
+
         file_count++;
     }
 
     rewinddir(target_dir);
 
-    //struct file file_array[file_count];
+    
 
     struct file* ptr = (struct file*) malloc(file_count*sizeof(struct file));
 
@@ -84,9 +135,17 @@ int main(int argc,char *argv[])
 
     while((dirp = readdir(target_dir)) != NULL)
     {
-        //you need to construct the path to the file, so stat can read the file.
+        if((strcmp(dirp->d_name,".") == 0 || strcmp(dirp->d_name,"..") == 0))
+        {
+            continue;
+        }
+        if (dirp->d_name[0] == '.')
+        {
+            continue;
+        }
+
         sprintf(file_path,"%s/%s",path_to_dir,dirp->d_name);
-        
+
         status = stat(file_path,&buff);
 
         if(status < 0)
@@ -94,35 +153,44 @@ int main(int argc,char *argv[])
             perror("Stat error");
             exit(3);
         }
-
-        //printf("%s time modified: %s  \n",dirp->d_name, ctime(&buff.st_mtime));
-
         
-        ptr[i].file_name = dirp->d_name;
+        ptr[i].file_name = strdup(dirp->d_name);
+        if(S_ISDIR(buff.st_mode))
+        {
+             ptr[i].is_dir = 1;
+        }
+        else 
+        {
+            ptr[i].is_dir = 0;
+        }
         
         ptr[i].mtime = buff.st_mtime;
 
         i++;
     
     }
-    //printf("%s %s\n", ptr[3].file_name, ctime(&ptr[3].mtime));
 
     qsort(ptr,file_count,sizeof(struct file),comp);
 
-    for(int j=0; j < file_count; j++)
-    {
-        //printf("%d \n",j);
-        printf("%s %s", ptr[j].file_name, ctime(&ptr[j].mtime));
-
-    }
-
-
-
-
     
 
+    for(int j=0; j < file_count; j++)
+    {
+        if(ptr[j].is_dir == 1)
+        {
+            printf(BLUE"%s/ \n"RESET, ptr[j].file_name);
+        }
+        else
+        { 
+            printf("%s \n", ptr[j].file_name);
+        }
+    }
 
     closedir(target_dir);
+    for(int j = 0; j < file_count; j++)
+    {
+        free(ptr[j].file_name);
+    }
     free(ptr);
 
     return 0;
